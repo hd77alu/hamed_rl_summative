@@ -1,0 +1,166 @@
+{
+  "selection": "best validation return over runs 01-11",
+  "test_seeds": "1000-1049",
+  "dqn": {
+    "best_run": "run_02_lr_1e-4",
+    "overrides": {
+      "lr": 0.0001
+    },
+    "model": "models\\dqn\\dqn_best.pt",
+    "val": {
+      "episodes": 50,
+      "mean_return": -30.16458484848483,
+      "std_return": 109.20285480263327,
+      "contained_rate": 0.44,
+      "village_safe_rate": 0.6799999999999999,
+      "battery_fail_rate": 0.24,
+      "timeout_rate": 0.0,
+      "mean_land_saved": 0.6357988326082314,
+      "mean_length": 47.52
+    },
+    "test": {
+      "episodes": 50,
+      "mean_return": -26.291056148696253,
+      "std_return": 108.64814486584515,
+      "contained_rate": 0.44,
+      "village_safe_rate": 0.8,
+      "battery_fail_rate": 0.36,
+      "timeout_rate": 0.0,
+      "mean_land_saved": 0.6383127989403871,
+      "mean_length": 48.78
+    },
+    "test_return_across_seeds": {
+      "n_seeds": 3,
+      "mean": -40.208300766836494,
+      "std": 10.3189680271747
+    }
+  },
+  "reinforce": {
+    "best_run": "run_09_batch_2000",
+    "overrides": {
+      "batch_frames": 2000
+    },
+    "model": "models\\pg\\reinforce_best.pt",
+    "val": {
+      "episodes": 50,
+      "mean_return": -113.28840413752913,
+      "std_return": 64.58508536672898,
+      "contained_rate": 0.22,
+      "village_safe_rate": 0.21999999999999997,
+      "battery_fail_rate": 0.0,
+      "timeout_rate": 0.0,
+      "mean_land_saved": 0.30641721624764073,
+      "mean_length": 72.96
+    },
+    "test": {
+      "episodes": 50,
+      "mean_return": -126.55948621320536,
+      "std_return": 49.61885025370478,
+      "contained_rate": 0.16,
+      "village_safe_rate": 0.16000000000000003,
+      "battery_fail_rate": 0.0,
+      "timeout_rate": 0.0,
+      "mean_land_saved": 0.26967513899260503,
+      "mean_length": 77.32
+    },
+    "test_return_across_seeds": {
+      "n_seeds": 3,
+      "mean": -124.39774392651917,
+      "std": 2.0871830017468307
+    }
+  },
+  "ppo": {
+    "best_run": "run_05_clip_0.3",
+    "overrides": {
+      "clip_epsilon": 0.3
+    },
+    "model": "models\\pg\\ppo_best.pt",
+    "val": {
+      "episodes": 50,
+      "mean_return": -21.051824388111882,
+      "std_return": 115.83269429073005,
+      "contained_rate": 0.5,
+      "village_safe_rate": 0.6599999999999999,
+      "battery_fail_rate": 0.16,
+      "timeout_rate": 0.0,
+      "mean_land_saved": 0.656026086015662,
+      "mean_length": 43.9
+    },
+    "test": {
+      "episodes": 50,
+      "mean_return": -16.448718817422865,
+      "std_return": 108.87991061782682,
+      "contained_rate": 0.54,
+      "village_safe_rate": 0.78,
+      "battery_fail_rate": 0.24,
+      "timeout_rate": 0.0,
+      "mean_land_saved": 0.6535324465854774,
+      "mean_length": 50.78
+    },
+    "test_return_across_seeds": {
+      "n_seeds": 3,
+      "mean": -15.436767311306246,
+      "std": 2.3905250480576843
+    }
+  },
+  "a2c": {
+    "best_run": "run_07_entropy_0",
+    "overrides": {
+      "entropy_coef": 0.0
+    },
+    "model": "models\\pg\\a2c_best.pt",
+    "val": {
+      "episodes": 50,
+      "mean_return": -42.00226136363635,
+      "std_return": 109.00371370113294,
+      "contained_rate": 0.36,
+      "village_safe_rate": 0.64,
+      "battery_fail_rate": 0.28,
+      "timeout_rate": 0.0,
+      "mean_land_saved": 0.6051462108978808,
+      "mean_length": 48.44
+    },
+    "test": {
+      "episodes": 50,
+      "mean_return": -34.79441216525721,
+      "std_return": 107.47625617376005,
+      "contained_rate": 0.38,
+      "village_safe_rate": 0.78,
+      "battery_fail_rate": 0.4,
+      "timeout_rate": 0.0,
+      "mean_land_saved": 0.6113838527653894,
+      "mean_length": 52.12
+    },
+    "test_return_across_seeds": {
+      "n_seeds": 3,
+      "mean": -61.387100530799934,
+      "std": 46.83633431536526
+    }
+  },
+  "baseline_greedy": {
+    "test": {
+      "episodes": 50,
+      "mean_return": 49.7253642587263,
+      "std_return": 62.80900126215266,
+      "contained_rate": 0.96,
+      "village_safe_rate": 0.96,
+      "battery_fail_rate": 0.0,
+      "timeout_rate": 0.0,
+      "mean_land_saved": 0.7815925806290711,
+      "mean_length": 52.06
+    }
+  },
+  "baseline_random": {
+    "test": {
+      "episodes": 50,
+      "mean_return": -114.0236241699192,
+      "std_return": 51.31903246231259,
+      "contained_rate": 0.12,
+      "village_safe_rate": 0.43999999999999995,
+      "battery_fail_rate": 0.32,
+      "timeout_rate": 0.0,
+      "mean_land_saved": 0.3767784035425629,
+      "mean_length": 75.22
+    }
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "best_run": "run_05_clip_0.3",
+  "overrides": {
+    "clip_epsilon": 0.3
+  },
+  "seeds": [
+    0,
+    1,
+    2
+  ]
+}

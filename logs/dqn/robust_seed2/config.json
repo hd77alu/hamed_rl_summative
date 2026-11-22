@@ -1,0 +1,29 @@
+{
+  "total_frames": 150000,
+  "seed": 2,
+  "hidden": 128,
+  "depth": 2,
+  "gamma": 0.99,
+  "reward_scale": 0.05,
+  "eval_every": 10000,
+  "log_every": 2000,
+  "lr": 0.0001,
+  "batch_size": 128,
+  "buffer_size": 50000,
+  "learning_starts": 2000,
+  "eps_start": 1.0,
+  "eps_end": 0.05,
+  "eps_decay_frames": 50000,
+  "train_freq": 4,
+  "target_update": "hard",
+  "target_update_interval": 500,
+  "tau": 0.01,
+  "double_dqn": false,
+  "loss_function": "smooth_l1",
+  "max_grad_norm": 10.0,
+  "frames_per_batch": 200,
+  "overrides": {
+    "lr": 0.0001
+  },
+  "phase": "robust"
+}

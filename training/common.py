@@ -124,12 +124,14 @@ def argmax_policy(net: nn.Module) -> Callable[[np.ndarray], int]:
     return act
 
 
-def evaluate(act_fn: Callable[[np.ndarray], int] | None, seeds: list[int], baseline: str | None = None) -> dict[str, Any]:
+def evaluate(act_fn: Callable[[np.ndarray], int] | None, seeds: list[int], baseline: str | None = None,
+             env_kwargs: dict[str, Any] | None = None) -> dict[str, Any]:
     """Run one episode per seed on the raw env and aggregate metrics.
 
     Either pass ``act_fn`` (obs -> action) or ``baseline`` in {"random", "greedy"}.
+    ``env_kwargs`` overrides environment settings (used for generalization tests).
     """
-    env = FireShieldEnv()
+    env = FireShieldEnv(**(env_kwargs or {}))
     returns, lengths, saved, outcomes = [], [], [], []
     for s in seeds:
         obs, info = env.reset(seed=s)
