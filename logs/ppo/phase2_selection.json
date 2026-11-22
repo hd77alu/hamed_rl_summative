@@ -1,0 +1,108 @@
+{
+  "algo": "ppo",
+  "criterion": "mean return on validation seeds 500-549",
+  "baseline": {
+    "run": "run_01_baseline",
+    "overrides": {},
+    "val_return": -116.64674120859756,
+    "val_contained": 0.12
+  },
+  "ranking": [
+    {
+      "run": "run_05_clip_0.3",
+      "overrides": {
+        "clip_epsilon": 0.3
+      },
+      "val_return": -21.051824388111882,
+      "val_contained": 0.5,
+      "beats_baseline": true
+    },
+    {
+      "run": "run_07_rollout_512",
+      "overrides": {
+        "rollout_frames": 512
+      },
+      "val_return": -28.044794318181815,
+      "val_contained": 0.44,
+      "beats_baseline": true
+    },
+    {
+      "run": "run_09_value_coef_1.0",
+      "overrides": {
+        "value_coef": 1.0
+      },
+      "val_return": -42.03343414376321,
+      "val_contained": 0.4,
+      "beats_baseline": true
+    },
+    {
+      "run": "run_08_entropy_0.05",
+      "overrides": {
+        "entropy_coef": 0.05
+      },
+      "val_return": -59.04634886363636,
+      "val_contained": 0.32,
+      "beats_baseline": true
+    },
+    {
+      "run": "run_04_clip_0.1",
+      "overrides": {
+        "clip_epsilon": 0.1
+      },
+      "val_return": -77.64947035764621,
+      "val_contained": 0.22,
+      "beats_baseline": true
+    },
+    {
+      "run": "run_03_lr_1e-3",
+      "overrides": {
+        "lr": 0.001
+      },
+      "val_return": -80.96415894115572,
+      "val_contained": 0.2,
+      "beats_baseline": true
+    },
+    {
+      "run": "run_02_lr_1e-4",
+      "overrides": {
+        "lr": 0.0001
+      },
+      "val_return": -100.45711443798446,
+      "val_contained": 0.12,
+      "beats_baseline": true
+    },
+    {
+      "run": "run_06_gae_lambda_0.8",
+      "overrides": {
+        "gae_lambda": 0.8
+      },
+      "val_return": -119.86808593199436,
+      "val_contained": 0.04,
+      "beats_baseline": false
+    }
+  ],
+  "run_10_combo_top2": {
+    "overrides": {
+      "clip_epsilon": 0.3,
+      "rollout_frames": 512
+    },
+    "from_runs": [
+      "run_05_clip_0.3",
+      "run_07_rollout_512"
+    ],
+    "skipped_conflicts": []
+  },
+  "run_11_combo_top3": {
+    "overrides": {
+      "clip_epsilon": 0.3,
+      "rollout_frames": 512,
+      "value_coef": 1.0
+    },
+    "from_runs": [
+      "run_05_clip_0.3",
+      "run_07_rollout_512",
+      "run_09_value_coef_1.0"
+    ],
+    "skipped_conflicts": []
+  }
+}

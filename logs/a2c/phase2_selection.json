@@ -1,0 +1,108 @@
+{
+  "algo": "a2c",
+  "criterion": "mean return on validation seeds 500-549",
+  "baseline": {
+    "run": "run_01_baseline",
+    "overrides": {},
+    "val_return": -101.68327918428469,
+    "val_contained": 0.1
+  },
+  "ranking": [
+    {
+      "run": "run_07_entropy_0",
+      "overrides": {
+        "entropy_coef": 0.0
+      },
+      "val_return": -42.00226136363635,
+      "val_contained": 0.36,
+      "beats_baseline": true
+    },
+    {
+      "run": "run_02_lr_3e-4",
+      "overrides": {
+        "lr": 0.0003
+      },
+      "val_return": -101.67899090909084,
+      "val_contained": 0.1,
+      "beats_baseline": true
+    },
+    {
+      "run": "run_04_rollout_5",
+      "overrides": {
+        "rollout_frames": 5
+      },
+      "val_return": -104.42204999999998,
+      "val_contained": 0.1,
+      "beats_baseline": false
+    },
+    {
+      "run": "run_05_rollout_64",
+      "overrides": {
+        "rollout_frames": 64
+      },
+      "val_return": -117.71431320472156,
+      "val_contained": 0.04,
+      "beats_baseline": false
+    },
+    {
+      "run": "run_03_lr_2e-3",
+      "overrides": {
+        "lr": 0.002
+      },
+      "val_return": -117.90544956835794,
+      "val_contained": 0.04,
+      "beats_baseline": false
+    },
+    {
+      "run": "run_08_entropy_0.05",
+      "overrides": {
+        "entropy_coef": 0.05
+      },
+      "val_return": -119.63724956835796,
+      "val_contained": 0.04,
+      "beats_baseline": false
+    },
+    {
+      "run": "run_06_gae_lambda_1.0",
+      "overrides": {
+        "gae_lambda": 1.0
+      },
+      "val_return": -122.0090041138125,
+      "val_contained": 0.04,
+      "beats_baseline": false
+    },
+    {
+      "run": "run_09_value_coef_1.0",
+      "overrides": {
+        "value_coef": 1.0
+      },
+      "val_return": -122.80149502290344,
+      "val_contained": 0.04,
+      "beats_baseline": false
+    }
+  ],
+  "run_10_combo_top2": {
+    "overrides": {
+      "entropy_coef": 0.0,
+      "lr": 0.0003
+    },
+    "from_runs": [
+      "run_07_entropy_0",
+      "run_02_lr_3e-4"
+    ],
+    "skipped_conflicts": []
+  },
+  "run_11_combo_top3": {
+    "overrides": {
+      "entropy_coef": 0.0,
+      "lr": 0.0003,
+      "rollout_frames": 5
+    },
+    "from_runs": [
+      "run_07_entropy_0",
+      "run_02_lr_3e-4",
+      "run_04_rollout_5"
+    ],
+    "skipped_conflicts": []
+  }
+}

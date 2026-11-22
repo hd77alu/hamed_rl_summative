@@ -1,0 +1,108 @@
+{
+  "algo": "reinforce",
+  "criterion": "mean return on validation seeds 500-549",
+  "baseline": {
+    "run": "run_01_baseline",
+    "overrides": {},
+    "val_return": -113.69011740052582,
+    "val_contained": 0.1
+  },
+  "ranking": [
+    {
+      "run": "run_09_batch_2000",
+      "overrides": {
+        "batch_frames": 2000
+      },
+      "val_return": -113.28840413752913,
+      "val_contained": 0.22,
+      "beats_baseline": true
+    },
+    {
+      "run": "run_03_lr_3e-3",
+      "overrides": {
+        "lr": 0.003
+      },
+      "val_return": -116.42276285507121,
+      "val_contained": 0.08,
+      "beats_baseline": false
+    },
+    {
+      "run": "run_04_gamma_0.95",
+      "overrides": {
+        "gamma": 0.95
+      },
+      "val_return": -116.77947836978915,
+      "val_contained": 0.06,
+      "beats_baseline": false
+    },
+    {
+      "run": "run_02_lr_3e-4",
+      "overrides": {
+        "lr": 0.0003
+      },
+      "val_return": -116.9259398018648,
+      "val_contained": 0.18,
+      "beats_baseline": false
+    },
+    {
+      "run": "run_08_entropy_0.05",
+      "overrides": {
+        "entropy_coef": 0.05
+      },
+      "val_return": -117.63650411381253,
+      "val_contained": 0.04,
+      "beats_baseline": false
+    },
+    {
+      "run": "run_07_entropy_0",
+      "overrides": {
+        "entropy_coef": 0.0
+      },
+      "val_return": -117.8605768410852,
+      "val_contained": 0.04,
+      "beats_baseline": false
+    },
+    {
+      "run": "run_06_no_return_norm",
+      "overrides": {
+        "normalize_returns": false
+      },
+      "val_return": -121.53916777389276,
+      "val_contained": 0.22,
+      "beats_baseline": false
+    },
+    {
+      "run": "run_05_value_baseline",
+      "overrides": {
+        "baseline": true
+      },
+      "val_return": -123.18688593199435,
+      "val_contained": 0.04,
+      "beats_baseline": false
+    }
+  ],
+  "run_10_combo_top2": {
+    "overrides": {
+      "batch_frames": 2000,
+      "lr": 0.003
+    },
+    "from_runs": [
+      "run_09_batch_2000",
+      "run_03_lr_3e-3"
+    ],
+    "skipped_conflicts": []
+  },
+  "run_11_combo_top3": {
+    "overrides": {
+      "batch_frames": 2000,
+      "lr": 0.003,
+      "gamma": 0.95
+    },
+    "from_runs": [
+      "run_09_batch_2000",
+      "run_03_lr_3e-3",
+      "run_04_gamma_0.95"
+    ],
+    "skipped_conflicts": []
+  }
+}

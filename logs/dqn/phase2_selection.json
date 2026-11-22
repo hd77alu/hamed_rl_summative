@@ -1,0 +1,110 @@
+{
+  "algo": "dqn",
+  "criterion": "mean return on validation seeds 500-549",
+  "baseline": {
+    "run": "run_01_baseline",
+    "overrides": {},
+    "val_return": -74.6911446542798,
+    "val_contained": 0.3
+  },
+  "ranking": [
+    {
+      "run": "run_02_lr_1e-4",
+      "overrides": {
+        "lr": 0.0001
+      },
+      "val_return": -30.16458484848483,
+      "val_contained": 0.44,
+      "beats_baseline": true
+    },
+    {
+      "run": "run_05_eps_decay_20k",
+      "overrides": {
+        "eps_decay_frames": 20000
+      },
+      "val_return": -52.23676400498724,
+      "val_contained": 0.44,
+      "beats_baseline": true
+    },
+    {
+      "run": "run_06_eps_decay_100k",
+      "overrides": {
+        "eps_decay_frames": 100000
+      },
+      "val_return": -60.4316139284165,
+      "val_contained": 0.38,
+      "beats_baseline": true
+    },
+    {
+      "run": "run_07_buffer_10k",
+      "overrides": {
+        "buffer_size": 10000
+      },
+      "val_return": -62.035769379844936,
+      "val_contained": 0.3,
+      "beats_baseline": true
+    },
+    {
+      "run": "run_09_double_dqn",
+      "overrides": {
+        "double_dqn": true
+      },
+      "val_return": -95.40590829199867,
+      "val_contained": 0.28,
+      "beats_baseline": false
+    },
+    {
+      "run": "run_08_soft_target_tau_0.01",
+      "overrides": {
+        "target_update": "soft"
+      },
+      "val_return": -96.35509295278364,
+      "val_contained": 0.22,
+      "beats_baseline": false
+    },
+    {
+      "run": "run_04_gamma_0.95",
+      "overrides": {
+        "gamma": 0.95
+      },
+      "val_return": -112.96385070472162,
+      "val_contained": 0.08,
+      "beats_baseline": false
+    },
+    {
+      "run": "run_03_lr_1e-3",
+      "overrides": {
+        "lr": 0.001
+      },
+      "val_return": -121.52264555144465,
+      "val_contained": 0.1,
+      "beats_baseline": false
+    }
+  ],
+  "run_10_combo_top2": {
+    "overrides": {
+      "lr": 0.0001,
+      "eps_decay_frames": 20000
+    },
+    "from_runs": [
+      "run_02_lr_1e-4",
+      "run_05_eps_decay_20k"
+    ],
+    "skipped_conflicts": []
+  },
+  "run_11_combo_top3": {
+    "overrides": {
+      "lr": 0.0001,
+      "eps_decay_frames": 20000,
+      "buffer_size": 10000
+    },
+    "from_runs": [
+      "run_02_lr_1e-4",
+      "run_05_eps_decay_20k",
+      "run_07_buffer_10k"
+    ],
+    "skipped_conflicts": [
+      "run_06_eps_decay_100k"
+    ]
+  }
+}
