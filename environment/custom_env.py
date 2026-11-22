@@ -4,8 +4,8 @@ A single drone with a limited water tank and battery must contain a stochastic,
 wind-driven wildfire on an N x N terrain grid and keep it away from a village.
 
 Design summary (full specification in assignment.md section 4):
-    Actions      Discrete(8): N, S, E, W, drop water, build firebreak,
-                 return-to-base/refill, hover/scan
+    Actions      Discrete(9): N, S, E, W, drop water, build firebreak,
+                 return-to-base/refill, hover/scan, fly-to-nearest-fire
     Observation  flat float32 vector (local 5x5 fire + fuel maps, drone state,
                  weather, and global situational features)
     Terminated   fire fully out (success), village ignites (failure),
@@ -27,7 +27,7 @@ GRASS, FOREST, ROCK, WATER, VILLAGE, BASE = range(6)
 TERRAIN_NAMES = ("grass", "forest", "rock", "water", "village", "base")
 
 # Actions
-MOVE_N, MOVE_S, MOVE_E, MOVE_W, DROP_WATER, FIREBREAK, RETURN_BASE, HOVER = range(8)
+MOVE_N, MOVE_S, MOVE_E, MOVE_W, DROP_WATER, FIREBREAK, RETURN_BASE, HOVER, FLY_TO_FIRE = range(9)
 ACTION_NAMES = (
     "move_north",
     "move_south",
@@ -37,6 +37,7 @@ ACTION_NAMES = (
     "build_firebreak",
     "return_to_base",
     "hover_scan",
+    "fly_to_fire",
 )
 MOVE_DELTAS = {MOVE_N: (-1, 0), MOVE_S: (1, 0), MOVE_E: (0, 1), MOVE_W: (0, -1)}
 
@@ -44,6 +45,9 @@ MOVE_DELTAS = {MOVE_N: (-1, 0), MOVE_S: (1, 0), MOVE_E: (0, 1), MOVE_W: (0, -1)}
 # means the wind blows TOWARD direction i (compass angle i * 45 degrees).
 COMPASS = ((-1, 0), (-1, 1), (0, 1), (1, 1), (1, 0), (1, -1), (0, -1), (-1, -1))
 COMPASS_NAMES = ("N", "NE", "E", "SE", "S", "SW", "W", "NW")
+_UNIT = np.array(COMPASS, np.float64) / np.linalg.norm(np.array(COMPASS, np.float64), axis=1, keepdims=True)
+# WIND_COS[w, d] = cosine between wind direction w and spread direction d
+WIND_COS = _UNIT @ _UNIT.T
 
 
 @dataclass(frozen=True)
@@ -59,7 +63,7 @@ class FireShieldConfig:
     # Fire dynamics
     min_ignitions: int = 1
     max_ignitions: int = 3
-    spread_prob: float = 0.16  # base ignition probability per burning neighbour
+    spread_prob: float = 0.10  # base ignition probability per burning neighbour
     diagonal_factor: float = 0.7  # diagonal neighbours spread less
     wind_strength: float = 1.5  # how strongly wind biases the spread
     ignition_intensity: float = 0.3
@@ -80,6 +84,12 @@ class FireShieldConfig:
     r_bump: float = -0.1  # trying to fly off the map
     r_step: float = -0.05  # time cost
     r_crash: float = -20.0  # battery depleted
+    # Potential-based shaping (Ng et al., 1999): F = gamma * phi(s') - phi(s),
+    # phi = -coef * distance(drone, target) / max_distance, where the target is the
+    # nearest fire while the tank has water, otherwise the base. This leaves the
+    # optimal policy unchanged and gives a dense signal. 0 disables it.
+    shaping_coef: float = 3.0
+    shaping_gamma: float = 0.99
 
 
 class FireShieldEnv(gym.Env):
@@ -132,6 +142,8 @@ class FireShieldEnv(gym.Env):
         high = np.concatenate([np.full(s, hi, np.float32) for _, s, _, hi in self.obs_layout])
         self.observation_space = spaces.Box(low=low, high=high, dtype=np.float32)
 
+        self._spread_buf = np.zeros((n + 2, n + 2), np.float32)
+        self._window_buf = np.zeros((n + 2 * cfg.view_radius, n + 2 * cfg.view_radius), np.float32)
         self._renderer = None
         self.last_action: int | None = None
         self.last_reward = 0.0
@@ -181,6 +193,7 @@ class FireShieldEnv(gym.Env):
         self.last_action = None
         self.last_reward = 0.0
         self.episode_return = 0.0
+        self.episode_shaping = 0.0
 
         if self.render_mode == "human":
             self.render()
@@ -230,6 +243,7 @@ class FireShieldEnv(gym.Env):
         cfg = self.cfg
         reward = cfg.r_step
         r, c = self.drone
+        phi_before = self._potential()
 
         # 1) Apply the drone action
         if action in MOVE_DELTAS:
@@ -243,11 +257,12 @@ class FireShieldEnv(gym.Env):
                 self.water = cfg.water_capacity
                 self.battery = cfg.battery_capacity
             else:
-                dr, dc = self.base_pos[0] - r, self.base_pos[1] - c
-                if abs(dr) >= abs(dc):
-                    reward += self._move(int(np.sign(dr)), 0)
-                else:
-                    reward += self._move(0, int(np.sign(dc)))
+                reward += self._step_toward(self.base_pos)
+        elif action == FLY_TO_FIRE:
+            # waypoint autopilot: one step toward the nearest burning cell
+            target = self._nearest_fire()
+            if target is not None and tuple(target) != (r, c):
+                reward += self._step_toward(target)
         # HOVER: no-op (holding pattern / scanning)
 
         # 2) Advance the fire simulation
@@ -277,12 +292,42 @@ class FireShieldEnv(gym.Env):
         if truncated:
             self.outcome = "timeout"
 
+        if cfg.shaping_coef:
+            phi_after = 0.0 if terminated else self._potential()
+            shaping = cfg.shaping_gamma * phi_after - phi_before
+            reward += shaping
+            self.episode_shaping += shaping
+
         self.last_action = action
         self.last_reward = reward
         self.episode_return += reward
         if self.render_mode == "human":
             self.render()
         return self._get_obs(), float(reward), terminated, truncated, self._get_info()
+
+    def _nearest_fire(self) -> np.ndarray | None:
+        fires = np.argwhere(self.intensity > 0)
+        if len(fires) == 0:
+            return None
+        return fires[int(np.argmin(np.abs(fires - self.drone).sum(axis=1)))]
+
+    def _step_toward(self, target) -> float:
+        dr, dc = int(target[0]) - self.drone[0], int(target[1]) - self.drone[1]
+        if abs(dr) >= abs(dc):
+            return self._move(int(np.sign(dr)), 0)
+        return self._move(0, int(np.sign(dc)))
+
+    def _potential(self) -> float:
+        if not self.cfg.shaping_coef:
+            return 0.0
+        if self.water > 0:
+            fires = np.argwhere(self.intensity > 0)
+            if len(fires) == 0:
+                return 0.0
+            dist = float(np.abs(fires - self.drone).sum(axis=1).min())
+        else:
+            dist = float(abs(self.drone[0] - self.base_pos[0]) + abs(self.drone[1] - self.base_pos[1]))
+        return -self.cfg.shaping_coef * dist / (2 * (self.n - 1))
 
     def _move(self, dr: int, dc: int) -> float:
         nr, nc = self.drone[0] + dr, self.drone[1] + dc
@@ -343,18 +388,16 @@ class FireShieldEnv(gym.Env):
         self.burnt[exhausted] = True
 
         # Spread: P(ignite) = 1 - prod_neighbours(1 - p_dir)
-        src = np.pad(self.intensity, 1)
+        src = self._spread_buf  # zero border, interior = current intensity
+        src[1:-1, 1:-1] = self.intensity
         no_ignite = np.ones((n, n), np.float32)
-        wind_vec = np.array(COMPASS[self.wind_dir], np.float32)
-        wind_vec /= np.linalg.norm(wind_vec)
-        for dr, dc in COMPASS:
-            direction = np.array((dr, dc), np.float32)
-            cos_sim = float(direction @ wind_vec / np.linalg.norm(direction))
-            wind_factor = max(0.1, 1.0 + cfg.wind_strength * self.wind_speed * cos_sim)
+        cos_row = WIND_COS[self.wind_dir]
+        for d, (dr, dc) in enumerate(COMPASS):
+            wind_factor = max(0.1, 1.0 + cfg.wind_strength * self.wind_speed * cos_row[d])
             dist_factor = cfg.diagonal_factor if dr and dc else 1.0
             # Fire spreading in direction (dr, dc) reaches [r, c] from [r-dr, c-dc]
             shifted = src[1 - dr : 1 - dr + n, 1 - dc : 1 - dc + n]
-            no_ignite *= 1.0 - cfg.spread_prob * dist_factor * wind_factor * shifted
+            no_ignite *= 1.0 - (cfg.spread_prob * dist_factor * wind_factor) * shifted
         target_factor = self.fuel * self.dryness * (1.0 - self.wet)
         p_ignite = (1.0 - no_ignite) * target_factor
         susceptible = (self.fuel > 0) & (self.intensity == 0) & ~self.burnt
@@ -376,7 +419,8 @@ class FireShieldEnv(gym.Env):
 
     def _local_window(self, grid: np.ndarray) -> np.ndarray:
         rad = self.cfg.view_radius
-        padded = np.pad(grid, rad)  # out-of-map cells read as 0 (no fire / no fuel)
+        padded = self._window_buf  # out-of-map cells read as 0 (no fire / no fuel)
+        padded[rad:-rad, rad:-rad] = grid
         r, c = self.drone
         return padded[r : r + 2 * rad + 1, c : c + 2 * rad + 1].ravel()
 
@@ -429,6 +473,7 @@ class FireShieldEnv(gym.Env):
             "water": self.water,
             "battery": self.battery,
             "outcome": self.outcome,
+            "episode_shaping": getattr(self, "episode_shaping", 0.0),
         }
 
     # -------------------------------------------------------------- rendering

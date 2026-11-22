@@ -44,7 +44,7 @@ def test_registered_id():
 
 def test_spaces():
     env = FireShieldEnv()
-    assert env.action_space.n == 8
+    assert env.action_space.n == 9
     expected = sum(size for _, size, _, _ in env.obs_layout)
     assert env.observation_space.shape == (expected,)
     obs, _ = env.reset(seed=1)
@@ -69,7 +69,7 @@ def test_determinism_under_seed():
     np.testing.assert_array_equal(oa, ob)
     rng = np.random.default_rng(0)
     for _ in range(60):
-        act = int(rng.integers(8))
+        act = int(rng.integers(9))
         ra = a.step(act)
         rb = b.step(act)
         np.testing.assert_array_equal(ra[0], rb[0])
@@ -172,3 +172,39 @@ def test_rgb_render():
     frame = env.render()
     assert frame.ndim == 3 and frame.shape[2] == 3 and frame.dtype == np.uint8
     env.close()
+
+
+def test_potential_shaping_rewards_approach():
+    """Moving toward the nearest fire earns more shaping than moving away."""
+    rewards = {}
+    for name, step_dir in (("toward", 1), ("away", -1)):
+        env = FireShieldEnv(shaping_coef=3.0, spread_prob=0.0)
+        env.reset(seed=11)
+        env.intensity[:] = 0
+        r, c = env.drone
+        target_c = c + 3 if c + 3 < env.n else c - 3
+        env.fuel[r, target_c] = 1.0
+        env.intensity[r, target_c] = 0.5
+        toward_east = target_c > c
+        action = (2 if toward_east else 3) if step_dir == 1 else (3 if toward_east else 2)
+        _, rew, *_ = env.step(action)
+        rewards[name] = rew
+    assert rewards["toward"] > rewards["away"]
+
+
+def test_shaping_can_be_disabled():
+    env = FireShieldEnv(shaping_coef=0.0)
+    env.reset(seed=12)
+    env.step(HOVER)
+    assert env._get_info()["episode_shaping"] == 0.0
+
+
+def test_fly_to_fire_moves_closer():
+    from environment.custom_env import FLY_TO_FIRE
+
+    env = FireShieldEnv(spread_prob=0.0)
+    env.reset(seed=13)
+    before = np.abs(env._nearest_fire() - env.drone).sum()
+    env.step(FLY_TO_FIRE)
+    after = np.abs(env._nearest_fire() - env.drone).sum()
+    assert after == before - 1

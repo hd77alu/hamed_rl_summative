@@ -1,0 +1,19 @@
+{
+  "total_frames": 150000,
+  "seed": 0,
+  "hidden": 128,
+  "depth": 2,
+  "gamma": 0.99,
+  "reward_scale": 0.05,
+  "eval_every": 10000,
+  "log_every": 2000,
+  "lr": 0.001,
+  "batch_frames": 500,
+  "normalize_returns": true,
+  "baseline": false,
+  "value_coef": 0.5,
+  "entropy_coef": 0.01,
+  "max_grad_norm": 1.0,
+  "overrides": {},
+  "phase": "phase1"
+}

@@ -1,0 +1,20 @@
+{
+  "total_frames": 150000,
+  "seed": 0,
+  "hidden": 128,
+  "depth": 2,
+  "gamma": 0.99,
+  "reward_scale": 0.05,
+  "eval_every": 10000,
+  "log_every": 2000,
+  "lr": 0.0007,
+  "gae_lambda": 0.95,
+  "rollout_frames": 16,
+  "entropy_coef": 0.01,
+  "value_coef": 1.0,
+  "max_grad_norm": 0.5,
+  "overrides": {
+    "value_coef": 1.0
+  },
+  "phase": "phase1"
+}
