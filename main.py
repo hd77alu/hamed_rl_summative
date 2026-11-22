@@ -6,6 +6,7 @@
     uv run main.py sweep --algo all --phase 1       hyperparameter sweep (1 | 2 | robust)
     uv run main.py finalize                         select best models, test-seed results
     uv run main.py evaluate                         evaluate best models + baselines
+    uv run main.py plots                            report figures -> assets/plots/
 """
 
 from __future__ import annotations
@@ -145,6 +146,12 @@ def cmd_evaluate(args) -> None:
               f"{r['village_safe_rate']:>14.0%}{r['mean_land_saved']:>12.0%}{r['mean_length']:>8.1f}")
 
 
+def cmd_plots(args) -> None:
+    from training.plots import make_all
+
+    make_all(regen=args.regen)
+
+
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(description="FireShield: wildfire response drone RL")
     sub = p.add_subparsers(dest="command")
@@ -181,6 +188,10 @@ def build_parser() -> argparse.ArgumentParser:
 
     ev = sub.add_parser("evaluate", help="evaluate best models and baselines on test seeds")
     ev.set_defaults(func=cmd_evaluate)
+
+    pl = sub.add_parser("plots", help="generate report figures from the logs")
+    pl.add_argument("--regen", action="store_true", help="recompute the cached generalization evaluation")
+    pl.set_defaults(func=cmd_plots)
     return p
 
 

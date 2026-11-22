@@ -1,0 +1,313 @@
+{
+  "seeds": "test 1000-1049",
+  "conditions": {
+    "Training\nconditions": {},
+    "Faster spread\n(p = 0.13)": {
+      "spread_prob": 0.13
+    },
+    "More ignitions\n(up to 5)": {
+      "max_ignitions": 5
+    },
+    "Stronger wind\n(2.5)": {
+      "wind_strength": 2.5
+    }
+  },
+  "results": {
+    "Training\nconditions": {
+      "dqn": {
+        "episodes": 50,
+        "mean_return": -26.291056148696253,
+        "std_return": 108.64814486584515,
+        "contained_rate": 0.44,
+        "village_safe_rate": 0.8,
+        "battery_fail_rate": 0.36,
+        "timeout_rate": 0.0,
+        "mean_land_saved": 0.6383127989403871,
+        "mean_length": 48.78
+      },
+      "reinforce": {
+        "episodes": 50,
+        "mean_return": -126.55948621320536,
+        "std_return": 49.61885025370478,
+        "contained_rate": 0.16,
+        "village_safe_rate": 0.16000000000000003,
+        "battery_fail_rate": 0.0,
+        "timeout_rate": 0.0,
+        "mean_land_saved": 0.26967513899260503,
+        "mean_length": 77.32
+      },
+      "ppo": {
+        "episodes": 50,
+        "mean_return": -16.448718817422865,
+        "std_return": 108.87991061782682,
+        "contained_rate": 0.54,
+        "village_safe_rate": 0.78,
+        "battery_fail_rate": 0.24,
+        "timeout_rate": 0.0,
+        "mean_land_saved": 0.6535324465854774,
+        "mean_length": 50.78
+      },
+      "a2c": {
+        "episodes": 50,
+        "mean_return": -34.79441216525721,
+        "std_return": 107.47625617376005,
+        "contained_rate": 0.38,
+        "village_safe_rate": 0.78,
+        "battery_fail_rate": 0.4,
+        "timeout_rate": 0.0,
+        "mean_land_saved": 0.6113838527653894,
+        "mean_length": 52.12
+      },
+      "greedy": {
+        "episodes": 50,
+        "mean_return": 49.7253642587263,
+        "std_return": 62.80900126215266,
+        "contained_rate": 0.96,
+        "village_safe_rate": 0.96,
+        "battery_fail_rate": 0.0,
+        "timeout_rate": 0.0,
+        "mean_land_saved": 0.7815925806290711,
+        "mean_length": 52.06
+      },
+      "random": {
+        "episodes": 50,
+        "mean_return": -114.0236241699192,
+        "std_return": 51.31903246231259,
+        "contained_rate": 0.12,
+        "village_safe_rate": 0.43999999999999995,
+        "battery_fail_rate": 0.32,
+        "timeout_rate": 0.0,
+        "mean_land_saved": 0.3767784035425629,
+        "mean_length": 75.22
+      }
+    },
+    "Faster spread\n(p = 0.13)": {
+      "dqn": {
+        "episodes": 50,
+        "mean_return": -54.04927618040872,
+        "std_return": 112.86847437678686,
+        "contained_rate": 0.36,
+        "village_safe_rate": 0.56,
+        "battery_fail_rate": 0.2,
+        "timeout_rate": 0.0,
+        "mean_land_saved": 0.5433439370886689,
+        "mean_length": 47.72
+      },
+      "reinforce": {
+        "episodes": 50,
+        "mean_return": -135.14564155011652,
+        "std_return": 44.145062685386804,
+        "contained_rate": 0.1,
+        "village_safe_rate": 0.09999999999999998,
+        "battery_fail_rate": 0.0,
+        "timeout_rate": 0.0,
+        "mean_land_saved": 0.25007596694823514,
+        "mean_length": 63.48
+      },
+      "ppo": {
+        "episodes": 50,
+        "mean_return": -40.346459543557195,
+        "std_return": 116.72030449285407,
+        "contained_rate": 0.46,
+        "village_safe_rate": 0.64,
+        "battery_fail_rate": 0.18,
+        "timeout_rate": 0.0,
+        "mean_land_saved": 0.5685882404637806,
+        "mean_length": 50.3
+      },
+      "a2c": {
+        "episodes": 50,
+        "mean_return": -51.07550421071174,
+        "std_return": 110.32968377347657,
+        "contained_rate": 0.36,
+        "village_safe_rate": 0.64,
+        "battery_fail_rate": 0.28,
+        "timeout_rate": 0.0,
+        "mean_land_saved": 0.5379140005675244,
+        "mean_length": 47.74
+      },
+      "greedy": {
+        "episodes": 50,
+        "mean_return": 26.30318506024868,
+        "std_return": 73.09443780398044,
+        "contained_rate": 0.94,
+        "village_safe_rate": 0.94,
+        "battery_fail_rate": 0.0,
+        "timeout_rate": 0.0,
+        "mean_land_saved": 0.6769275368693086,
+        "mean_length": 59.86
+      },
+      "random": {
+        "episodes": 50,
+        "mean_return": -129.40273505786845,
+        "std_return": 47.82776749265411,
+        "contained_rate": 0.06,
+        "village_safe_rate": 0.26,
+        "battery_fail_rate": 0.2,
+        "timeout_rate": 0.0,
+        "mean_land_saved": 0.3287555122275523,
+        "mean_length": 63.4
+      }
+    },
+    "More ignitions\n(up to 5)": {
+      "dqn": {
+        "episodes": 50,
+        "mean_return": -71.25228251748251,
+        "std_return": 99.9171962784251,
+        "contained_rate": 0.26,
+        "village_safe_rate": 0.5800000000000001,
+        "battery_fail_rate": 0.32,
+        "timeout_rate": 0.0,
+        "mean_land_saved": 0.4986929419884302,
+        "mean_length": 54.04
+      },
+      "reinforce": {
+        "episodes": 50,
+        "mean_return": -130.62050395931587,
+        "std_return": 44.61744117998227,
+        "contained_rate": 0.14,
+        "village_safe_rate": 0.14,
+        "battery_fail_rate": 0.0,
+        "timeout_rate": 0.0,
+        "mean_land_saved": 0.24504954477167418,
+        "mean_length": 67.08
+      },
+      "ppo": {
+        "episodes": 50,
+        "mean_return": -47.718029910012454,
+        "std_return": 105.75279782958873,
+        "contained_rate": 0.42,
+        "village_safe_rate": 0.62,
+        "battery_fail_rate": 0.2,
+        "timeout_rate": 0.0,
+        "mean_land_saved": 0.5573003081158489,
+        "mean_length": 53.26
+      },
+      "a2c": {
+        "episodes": 50,
+        "mean_return": -69.27380997994251,
+        "std_return": 98.29421982409556,
+        "contained_rate": 0.24,
+        "village_safe_rate": 0.6,
+        "battery_fail_rate": 0.36,
+        "timeout_rate": 0.0,
+        "mean_land_saved": 0.5061709797605317,
+        "mean_length": 53.18
+      },
+      "greedy": {
+        "episodes": 50,
+        "mean_return": 17.49500457299886,
+        "std_return": 78.17877142434654,
+        "contained_rate": 0.88,
+        "village_safe_rate": 0.88,
+        "battery_fail_rate": 0.0,
+        "timeout_rate": 0.0,
+        "mean_land_saved": 0.6575721264250114,
+        "mean_length": 59.24
+      },
+      "random": {
+        "episodes": 50,
+        "mean_return": -129.46562304439746,
+        "std_return": 41.09011213299121,
+        "contained_rate": 0.08,
+        "village_safe_rate": 0.26,
+        "battery_fail_rate": 0.18,
+        "timeout_rate": 0.0,
+        "mean_land_saved": 0.3190617706817407,
+        "mean_length": 68.14
+      }
+    },
+    "Stronger wind\n(2.5)": {
+      "dqn": {
+        "episodes": 50,
+        "mean_return": -20.83008904496665,
+        "std_return": 107.13847362396238,
+        "contained_rate": 0.48,
+        "village_safe_rate": 0.7,
+        "battery_fail_rate": 0.22,
+        "timeout_rate": 0.0,
+        "mean_land_saved": 0.6632248406863924,
+        "mean_length": 47.06
+      },
+      "reinforce": {
+        "episodes": 50,
+        "mean_return": -107.9541104861224,
+        "std_return": 65.75672162341007,
+        "contained_rate": 0.22,
+        "village_safe_rate": 0.21999999999999997,
+        "battery_fail_rate": 0.0,
+        "timeout_rate": 0.0,
+        "mean_land_saved": 0.3464465022489034,
+        "mean_length": 78.26
+      },
+      "ppo": {
+        "episodes": 50,
+        "mean_return": -0.5822652992356285,
+        "std_return": 108.85155883962747,
+        "contained_rate": 0.58,
+        "village_safe_rate": 0.76,
+        "battery_fail_rate": 0.18,
+        "timeout_rate": 0.0,
+        "mean_land_saved": 0.7198090265497923,
+        "mean_length": 43.1
+      },
+      "a2c": {
+        "episodes": 50,
+        "mean_return": -19.347753030303,
+        "std_return": 106.37731827122899,
+        "contained_rate": 0.48,
+        "village_safe_rate": 0.76,
+        "battery_fail_rate": 0.28,
+        "timeout_rate": 0.0,
+        "mean_land_saved": 0.6531035269543338,
+        "mean_length": 48.78
+      },
+      "greedy": {
+        "episodes": 50,
+        "mean_return": 50.43479540770034,
+        "std_return": 59.89451671134764,
+        "contained_rate": 0.98,
+        "village_safe_rate": 0.98,
+        "battery_fail_rate": 0.0,
+        "timeout_rate": 0.0,
+        "mean_land_saved": 0.7728168172449154,
+        "mean_length": 51.92
+      },
+      "random": {
+        "episodes": 50,
+        "mean_return": -97.53465303233587,
+        "std_return": 69.64074954136436,
+        "contained_rate": 0.2,
+        "village_safe_rate": 0.42000000000000004,
+        "battery_fail_rate": 0.22,
+        "timeout_rate": 0.0,
+        "mean_land_saved": 0.43422281301274074,
+        "mean_length": 70.44
+      }
+    }
+  },
+  "val_baselines": {
+    "greedy": {
+      "episodes": 50,
+      "mean_return": 37.63526474740201,
+      "std_return": 71.05456919153849,
+      "contained_rate": 0.94,
+      "village_safe_rate": 0.94,
+      "battery_fail_rate": 0.0,
+      "timeout_rate": 0.0,
+      "mean_land_saved": 0.7305678823606272,
+      "mean_length": 52.98
+    },
+    "random": {
+      "episodes": 50,
+      "mean_return": -118.04855881782943,
+      "std_return": 59.49676673686508,
+      "contained_rate": 0.1,
+      "village_safe_rate": 0.36,
+      "battery_fail_rate": 0.26,
+      "timeout_rate": 0.0,
+      "mean_land_saved": 0.3678104707829155,
+      "mean_length": 71.46
+    }
+  }
+}
