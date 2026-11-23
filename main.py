@@ -1,7 +1,7 @@
 """FireShield command-line entry point.
 
     uv run main.py                                  play the best trained agent (GUI)
-    uv run main.py play --algo ppo --episodes 3     play a specific algorithm
+    uv run main.py play --algo ppo --episodes 3     play a specific algorithm (default: 6 episodes)
     uv run main.py train --algo dqn --set lr=1e-3   one training run
     uv run main.py sweep --algo all --phase 1       hyperparameter sweep (1 | 2 | robust)
     uv run main.py finalize                         select best models, test-seed results
@@ -10,6 +10,7 @@
     uv run main.py export                           best model -> TorchScript + NumPy + policy card
     uv run main.py serve --port 8000                JSON inference API (POST /act)
     uv run main.py client-demo                      drone simulator driven through the API
+    uv run main.py record                           MP4 of the best agent -> assets/video/
 """
 
 from __future__ import annotations
@@ -37,7 +38,7 @@ def parse_overrides(pairs: list[str]) -> dict:
 
 def best_model_path(algo: str | None) -> Path | None:
     """Model to play: the requested algorithm, else the best on the test seeds."""
-    group = lambda a: "dqn" if a == "dqn" else "pg"  # noqa: E731
+    group = lambda a: "dqn" if a == "dqn" else "pg"
     if algo:
         p = ROOT / "models" / group(algo) / f"{algo}_best.pt"
         return p if p.exists() else None
@@ -75,6 +76,7 @@ def cmd_play(args) -> None:
 
     env = FireShieldEnv(render_mode=None if args.headless else "human")
     print(f"\nFireShield | policy: {label} | episodes: {args.episodes} | start seed: {args.seed}\n")
+    results = []
     for ep in range(args.episodes):
         seed = args.seed + ep
         obs, info = env.reset(seed=seed)
@@ -99,9 +101,14 @@ def cmd_play(args) -> None:
         print(f"=== Episode {ep + 1} result: {info['outcome'].upper()} | return {total:.1f} | steps {info['steps']} | "
               f"land saved {info['forest_saved']:.0%} | extinguished {info['cells_extinguished']} | "
               f"water used {info['water_used']} | firebreaks {info['firebreaks_built']}\n")
+        results.append((info["outcome"], total))
         if not args.headless:
             time.sleep(1.5)
     env.close()
+    outcomes = [o for o, _ in results]
+    print(f"Summary over {len(results)} episodes: contained {outcomes.count('contained')}, "
+          f"village burnt {outcomes.count('village_burnt')}, battery depleted {outcomes.count('battery_depleted')}, "
+          f"timeout {outcomes.count('timeout')} | mean return {sum(t for _, t in results) / len(results):.1f}")
 
 
 def cmd_train(args) -> None:
@@ -176,6 +183,32 @@ def cmd_client_demo(args) -> None:
     run(args.url, args.episodes, args.seed, args.backend)
 
 
+def cmd_record(args) -> None:
+    from environment.baselines import greedy_policy, random_policy
+    from environment.recording import record
+
+    out = Path(args.out) if args.out else None
+    if args.policy in ("greedy", "random"):
+        fn = greedy_policy if args.policy == "greedy" else random_policy
+        label, act, sub = f"{args.policy.capitalize()} baseline policy", (lambda obs, env: fn(env)), "hand-coded reference"
+        out = out or ROOT / "assets" / "video" / f"fireshield_{args.policy}.mp4"
+    else:
+        from training.common import argmax_policy, load_policy
+
+        path = Path(args.model) if args.model else best_model_path(args.algo)
+        if path is None or not path.exists():
+            sys.exit("No trained model found - run training and `uv run main.py finalize` first.")
+        net, meta = load_policy(path)
+        greedy_act = argmax_policy(net)
+        algo = meta["algo"]
+        label, act = f"Trained {algo.upper()} agent", (lambda obs, env: greedy_act(obs))
+        ov = meta["config"].get("overrides") or {}
+        hp = ", ".join(f"{k} = {v}" for k, v in ov.items()) or "default hyperparameters"
+        sub = f"{hp} | {meta['config'].get('total_frames', 150000) // 1000}k training steps | TorchRL"
+        out = out or ROOT / "assets" / "video" / f"fireshield_{algo}_agent.mp4"
+    record(act, label, out, args.episodes, args.seed, sub)
+
+
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(description="FireShield: wildfire response drone RL")
     sub = p.add_subparsers(dest="command")
@@ -184,7 +217,7 @@ def build_parser() -> argparse.ArgumentParser:
     play.add_argument("--algo", choices=ALGOS)
     play.add_argument("--model", help="path to a .pt checkpoint")
     play.add_argument("--policy", choices=("model", "greedy", "random"), default="model")
-    play.add_argument("--episodes", type=int, default=3)
+    play.add_argument("--episodes", type=int, default=6)
     play.add_argument("--seed", type=int, default=1000, help="first episode seed (1000+ = unseen test seeds)")
     play.add_argument("--headless", action="store_true", help="no window, terminal output only")
     play.add_argument("--quiet", dest="verbose", action="store_false", help="no per-step output")
@@ -234,6 +267,15 @@ def build_parser() -> argparse.ArgumentParser:
     cd.add_argument("--seed", type=int, default=1000)
     cd.add_argument("--backend", choices=("numpy", "torchscript", "checkpoint"), default="numpy")
     cd.set_defaults(func=cmd_client_demo)
+
+    rc = sub.add_parser("record", help="record an MP4 of an agent playing")
+    rc.add_argument("--algo", choices=ALGOS, help="default: best algorithm on the test seeds")
+    rc.add_argument("--model", help="path to a .pt checkpoint")
+    rc.add_argument("--policy", choices=("model", "greedy", "random"), default="model")
+    rc.add_argument("--episodes", type=int, default=3)
+    rc.add_argument("--seed", type=int, default=1000)
+    rc.add_argument("--out", help="output .mp4 (default: assets/video/fireshield_<algo>_agent.mp4)")
+    rc.set_defaults(func=cmd_record)
     return p
 
 

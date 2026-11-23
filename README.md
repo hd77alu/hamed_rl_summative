@@ -32,14 +32,14 @@ hamed_rl_summative/
 │   ├── pg/                  # {reinforce,ppo,a2c}_<run>.pt, *_best.pt
 │   └── export/              # policy.torchscript.pt, policy_weights.npz, policy_card.json
 ├── logs/                    # per-run config.json, metrics.csv, summary.json; sweep tables
-├── assets/                  # plots and environment screenshots for the report
+├── assets/                  # env/ screenshot, plots/ report figures, video/ agent recording
 └── tests/                   # environment + integration tests (uv run --extra dev pytest)
 ```
 
 ## Quick Start
 ```bash
 uv sync
-uv run main.py            # play the best trained agent in the GUI (same as: uv run play.py)
+uv run main.py            # play the best trained agent in the GUI, 6 test episodes (same as: uv run play.py)
 ```
 
 ## Training & Experiments
@@ -60,6 +60,7 @@ uv run main.py play --policy greedy --headless   # hand-coded baseline, terminal
 
 ```bash
 uv run main.py plots          # report figures + result tables -> assets/plots/
+uv run main.py record         # MP4 of the best agent on 3 test seeds -> assets/video/
 ```
 
 ## Integration: Using the Trained Policy Outside Training
