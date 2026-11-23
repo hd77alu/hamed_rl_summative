@@ -7,6 +7,9 @@
     uv run main.py finalize                         select best models, test-seed results
     uv run main.py evaluate                         evaluate best models + baselines
     uv run main.py plots                            report figures -> assets/plots/
+    uv run main.py export                           best model -> TorchScript + NumPy + policy card
+    uv run main.py serve --port 8000                JSON inference API (POST /act)
+    uv run main.py client-demo                      drone simulator driven through the API
 """
 
 from __future__ import annotations
@@ -152,6 +155,27 @@ def cmd_plots(args) -> None:
     make_all(regen=args.regen)
 
 
+def cmd_export(args) -> None:
+    from integration.export import export
+
+    path = best_model_path(args.algo)
+    if path is None:
+        sys.exit("No trained model found - run training and `uv run main.py finalize` first.")
+    export(path)
+
+
+def cmd_serve(args) -> None:
+    from integration.server import serve
+
+    serve(args.host, args.port, args.backend, args.algo)
+
+
+def cmd_client_demo(args) -> None:
+    from integration.client_demo import run
+
+    run(args.url, args.episodes, args.seed, args.backend)
+
+
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(description="FireShield: wildfire response drone RL")
     sub = p.add_subparsers(dest="command")
@@ -192,6 +216,24 @@ def build_parser() -> argparse.ArgumentParser:
     pl = sub.add_parser("plots", help="generate report figures from the logs")
     pl.add_argument("--regen", action="store_true", help="recompute the cached generalization evaluation")
     pl.set_defaults(func=cmd_plots)
+
+    ex = sub.add_parser("export", help="export the best model to TorchScript + NumPy + policy card")
+    ex.add_argument("--algo", choices=ALGOS, help="default: best algorithm on the test seeds")
+    ex.set_defaults(func=cmd_export)
+
+    sv = sub.add_parser("serve", help="run the JSON inference API")
+    sv.add_argument("--host", default="127.0.0.1")
+    sv.add_argument("--port", type=int, default=8000)
+    sv.add_argument("--backend", choices=("numpy", "torchscript", "checkpoint"), default="numpy")
+    sv.add_argument("--algo", choices=ALGOS, help="checkpoint backend only")
+    sv.set_defaults(func=cmd_serve)
+
+    cd = sub.add_parser("client-demo", help="fly episodes where every action comes from the API")
+    cd.add_argument("--url", help="existing server (default: start one locally)")
+    cd.add_argument("--episodes", type=int, default=3)
+    cd.add_argument("--seed", type=int, default=1000)
+    cd.add_argument("--backend", choices=("numpy", "torchscript", "checkpoint"), default="numpy")
+    cd.set_defaults(func=cmd_client_demo)
     return p
 
 

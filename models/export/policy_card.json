@@ -1,0 +1,120 @@
+{
+  "name": "FireShield wildfire response drone policy",
+  "algo": "ppo",
+  "exported": "2026-11-23",
+  "source_checkpoint": "models\\pg\\ppo_best.pt",
+  "obs_dim": 65,
+  "n_actions": 9,
+  "hidden": 128,
+  "depth": 2,
+  "architecture": "MLP 65 -> 128 -> 128 -> 9 (ReLU)",
+  "output": "logits",
+  "decision_rule": "action = argmax(output)",
+  "actions": [
+    "move_north",
+    "move_south",
+    "move_east",
+    "move_west",
+    "drop_water",
+    "build_firebreak",
+    "return_to_base",
+    "hover_scan",
+    "fly_to_fire"
+  ],
+  "observation_layout": [
+    {
+      "name": "local_fire",
+      "size": 25,
+      "low": 0.0,
+      "high": 1.0
+    },
+    {
+      "name": "local_fuel",
+      "size": 25,
+      "low": 0.0,
+      "high": 1.0
+    },
+    {
+      "name": "drone_pos",
+      "size": 2,
+      "low": 0.0,
+      "high": 1.0
+    },
+    {
+      "name": "water_level",
+      "size": 1,
+      "low": 0.0,
+      "high": 1.0
+    },
+    {
+      "name": "battery_level",
+      "size": 1,
+      "low": 0.0,
+      "high": 1.0
+    },
+    {
+      "name": "wind_dir_sincos",
+      "size": 2,
+      "low": -1.0,
+      "high": 1.0
+    },
+    {
+      "name": "wind_speed",
+      "size": 1,
+      "low": 0.0,
+      "high": 1.0
+    },
+    {
+      "name": "dryness",
+      "size": 1,
+      "low": 0.0,
+      "high": 1.0
+    },
+    {
+      "name": "vec_nearest_fire",
+      "size": 2,
+      "low": -1.0,
+      "high": 1.0
+    },
+    {
+      "name": "vec_base",
+      "size": 2,
+      "low": -1.0,
+      "high": 1.0
+    },
+    {
+      "name": "village_threat",
+      "size": 1,
+      "low": 0.0,
+      "high": 1.0
+    },
+    {
+      "name": "frac_burning",
+      "size": 1,
+      "low": 0.0,
+      "high": 1.0
+    },
+    {
+      "name": "frac_burnt",
+      "size": 1,
+      "low": 0.0,
+      "high": 1.0
+    }
+  ],
+  "env_config": {
+    "grid_size": 12,
+    "view_radius": 2,
+    "water_capacity": 4,
+    "battery_capacity": 80
+  },
+  "test_metrics_seeds_1000_1049": {
+    "mean_return": -16.448718817422865,
+    "contained_rate": 0.54,
+    "village_safe_rate": 0.78,
+    "mean_land_saved": 0.6535324465854774
+  },
+  "files": {
+    "torchscript": "policy.torchscript.pt",
+    "numpy_weights": "policy_weights.npz"
+  }
+}
