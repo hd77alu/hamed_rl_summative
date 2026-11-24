@@ -399,10 +399,91 @@ def fig_generalization() -> Path:
     axes[1].yaxis.set_major_formatter(matplotlib.ticker.PercentFormatter(1.0))
     axes[0].set_title("Return under changed fire conditions")
     axes[1].set_title("Containment rate under changed fire conditions")
-    fig.suptitle("Generalization: selected models on unseen test seeds and harder, never-trained conditions",
+    fig.suptitle("Generalization: selected models on unseen test seeds and changed, never-trained conditions",
                  x=0.06, ha="left", fontsize=12, fontweight="bold", y=1.03)
     fig.subplots_adjust(wspace=0.32)
     return _save(fig, "fig7_generalization.png")
+
+
+# ------------------------------------------------- episode-based figures (report)
+CONVERGENCE_WINDOW = 10  # log points (about 20k steps)
+CONVERGENCE_TOL = 15.0  # return points around the final level
+
+
+def _episode_curve(algo: str, run: str, smooth: int) -> tuple[np.ndarray, np.ndarray]:
+    """Cumulative finished episodes and (smoothed) training return for one run."""
+    df = _metrics(algo, run)
+    y = df["train_return"].rolling(smooth, min_periods=smooth).mean().to_numpy()
+    return df["episodes"].cumsum().to_numpy(), y
+
+
+def convergence_table() -> pd.DataFrame:
+    """Per seed: episodes until training return first beats random + 50, and until it stays
+    within CONVERGENCE_TOL of its final level (mean of the last CONVERGENCE_WINDOW logs)."""
+    threshold = _baselines()["random"]["mean_return"] + 50
+    rows = []
+    for algo in ALGOS:
+        for seed, run in enumerate(_seed_runs(algo)):
+            ep, y = _episode_curve(algo, run, CONVERGENCE_WINDOW)
+            final = float(_metrics(algo, run)["train_return"].tail(CONVERGENCE_WINDOW).mean())
+            ok = np.abs(y - final) <= CONVERGENCE_TOL
+            i = len(y)
+            while i > 0 and ok[i - 1]:
+                i -= 1
+            hit = np.nonzero(y >= threshold)[0]
+            rows.append({"algo": algo, "seed": seed, "total_episodes": int(ep[-1]), "final_return": round(final, 1),
+                         "stable_episode": int(ep[i]), "threshold_episode": int(ep[hit[0]]) if len(hit) else None})
+    return pd.DataFrame(rows)
+
+
+def fig_rewards_by_episode() -> Path:
+    base = _baselines()
+    fig, axes = plt.subplots(2, 2, figsize=(11, 6), sharex=True, sharey=True)
+    for ax, algo in zip(axes.flat, ALGOS):
+        for seed, run in enumerate(_seed_runs(algo)):
+            ep, y = _episode_curve(algo, run, 5)
+            ax.plot(ep, y, color=COLOR[algo], ls=("-", "--", ":")[seed], lw=1.8, label=f"seed {seed}")
+        ax.axhline(base["greedy"]["mean_return"], color=GREEDY_C, lw=1.2, ls="--", zorder=1)
+        ax.axhline(base["random"]["mean_return"], color=RANDOM_C, lw=1.2, ls=":", zorder=1)
+        ax.text(0.99, base["greedy"]["mean_return"] - 4, "greedy (test)", transform=ax.get_yaxis_transform(),
+                ha="right", va="top", fontsize=8.5, color=INK2)
+        ax.text(0.99, base["random"]["mean_return"] - 4, "random (test)", transform=ax.get_yaxis_transform(),
+                ha="right", va="top", fontsize=8.5, color=INK2)
+        ax.set_title(f"{LABEL[algo]} ({_best_run(algo)[7:]})")
+        ax.set_ylim(-150, 65)
+        ax.legend(loc="upper left", ncol=3, bbox_to_anchor=(0, 0.9))
+    for ax in axes[1]:
+        ax.set_xlabel("Training episodes")
+    for ax in axes[:, 0]:
+        ax.set_ylabel("Episode return")
+    fig.subplots_adjust(hspace=0.24, wspace=0.06)
+    return _save(fig, "fig8_rewards_by_episode.png")
+
+
+def fig_episodes_to_converge() -> Path:
+    t = convergence_table()
+    fig, axes = plt.subplots(1, 2, figsize=(11, 2.9), sharey=True)
+    panels = (("threshold_episode", "First beats random by 50 points"), ("stable_episode", "Return settles at its final level"))
+    for ax, (col, title) in zip(axes, panels):
+        for i, algo in enumerate(ALGOS[::-1]):
+            sub = t[t["algo"] == algo]
+            for _, r in sub.iterrows():
+                if pd.isna(r[col]):
+                    continue
+                learned = r["final_return"] > -64
+                ax.plot(r[col], i, marker=MARKER[algo], ms=9, ls="", color=COLOR[algo] if learned else SURFACE,
+                        markeredgecolor=COLOR[algo], markeredgewidth=1.6)
+            missed = int(sub[col].isna().sum())
+            if missed:
+                ax.text(2960, i, f"{missed} of 3 seeds never", va="center", ha="right", fontsize=8.5, color=INK2)
+        ax.set_yticks(range(len(ALGOS)), [LABEL[a] for a in ALGOS[::-1]])
+        ax.set_ylim(-0.6, 3.6)
+        ax.set_xlim(0, 3000)
+        ax.set_xlabel("Training episodes (filled = learned, hollow = failed level)")
+        ax.set_title(title)
+    fig.subplots_adjust(wspace=0.08)
+    t.to_csv(OUT_DIR / "episodes_to_converge.csv", index=False)
+    return _save(fig, "fig9_episodes_to_converge.png")
 
 
 # ----------------------------------------------------------------- helpers
@@ -482,7 +563,8 @@ def make_all(regen: bool = False) -> None:
     _style()
     _generalization(regen)
     for fn in (fig_comparative_rewards, fig_dqn_objective, fig_pg_entropy, fig_convergence,
-               fig_sweep, fig_test_results, fig_generalization):
+               fig_sweep, fig_test_results, fig_generalization, fig_rewards_by_episode,
+               fig_episodes_to_converge):
         fn()
     write_tables()
 

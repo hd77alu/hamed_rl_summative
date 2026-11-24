@@ -1,7 +1,7 @@
 """Record an MP4 of a policy playing FireShield (rendered with the rgb_array renderer).
 
     uv run main.py record                              # best model, test seeds 1000-1002
-    uv run main.py record --algo dqn --episodes 5 --out assets/video/dqn.mp4
+    uv run main.py record --algo dqn --episodes 5 --out assets/agent_env/video/dqn.mp4
 """
 
 from __future__ import annotations

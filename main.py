@@ -10,7 +10,7 @@
     uv run main.py export                           best model -> TorchScript + NumPy + policy card
     uv run main.py serve --port 8000                JSON inference API (POST /act)
     uv run main.py client-demo                      drone simulator driven through the API
-    uv run main.py record                           MP4 of the best agent -> assets/video/
+    uv run main.py record                           MP4 of the best agent -> assets/agent_env/video/
 """
 
 from __future__ import annotations
@@ -89,8 +89,10 @@ def cmd_play(args) -> None:
                 a = greedy_policy(env)
             elif args.policy == "random":
                 a = random_policy(env)
-            else:
+            elif act is not None:
                 a = act(obs)
+            else:
+                raise RuntimeError("No callable trained policy was configured")
             obs, r, term, trunc, info = env.step(a)
             total += r
             done = term or trunc
@@ -191,7 +193,7 @@ def cmd_record(args) -> None:
     if args.policy in ("greedy", "random"):
         fn = greedy_policy if args.policy == "greedy" else random_policy
         label, act, sub = f"{args.policy.capitalize()} baseline policy", (lambda obs, env: fn(env)), "hand-coded reference"
-        out = out or ROOT / "assets" / "video" / f"fireshield_{args.policy}.mp4"
+        out = out or ROOT / "assets" / "agent_env" / "video" / f"fireshield_{args.policy}.mp4"
     else:
         from training.common import argmax_policy, load_policy
 
@@ -205,7 +207,7 @@ def cmd_record(args) -> None:
         ov = meta["config"].get("overrides") or {}
         hp = ", ".join(f"{k} = {v}" for k, v in ov.items()) or "default hyperparameters"
         sub = f"{hp} | {meta['config'].get('total_frames', 150000) // 1000}k training steps | TorchRL"
-        out = out or ROOT / "assets" / "video" / f"fireshield_{algo}_agent.mp4"
+        out = out or ROOT / "assets" / "agent_env" / "video" / f"fireshield_{algo}_agent.mp4"
     record(act, label, out, args.episodes, args.seed, sub)
 
 
@@ -274,7 +276,7 @@ def build_parser() -> argparse.ArgumentParser:
     rc.add_argument("--policy", choices=("model", "greedy", "random"), default="model")
     rc.add_argument("--episodes", type=int, default=3)
     rc.add_argument("--seed", type=int, default=1000)
-    rc.add_argument("--out", help="output .mp4 (default: assets/video/fireshield_<algo>_agent.mp4)")
+    rc.add_argument("--out", help="output .mp4 (default: assets/agent_env/video/fireshield_<algo>_agent.mp4)")
     rc.set_defaults(func=cmd_record)
     return p
 
