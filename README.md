@@ -8,7 +8,8 @@ Four TorchRL agents (**DQN, REINFORCE, PPO and A2C**) are trained and compared o
 
 ![FireShield environment](assets/agent_env/env_screenshot.png)
 
-**[Watch the trained PPO agent (MP4)](assets/agent_env/video/fireshield_ppo_agent.mp4)** · **[Full experiment tables and analysis](experiments.md)**
+> - **[Watch the trained PPO agent (MP4)](assets/agent_env/video/fireshield_ppo_agent.mp4)** 
+> - **[Full experiment tables and analysis](experiments.md)**
 
 ## Project Structure
 ```text
@@ -62,7 +63,7 @@ You need [Git](https://git-scm.com/downloads) and [uv](https://docs.astral.sh/uv
    ```bash
    uv sync
    ```
-4. Run the best trained agent:
+4. Run the best-trained agent:
    ```bash
    uv run main.py
    ```
@@ -73,7 +74,7 @@ This opens the simulation window and plays six test episodes with the trained PP
 
 | Part | Summary |
 |---|---|
-| World | 12×12 grid with forest, grass, rock, water, a village and a base. Wind and dryness affect fire spread |
+| World | 12×12 grid with forest, grass, rock, water, a village, and a base. Wind and dryness affect fire spread |
 | Agent | One drone with 4 water drops and 80 battery units, both restored at the base |
 | Actions (9, discrete) | Move in 4 directions, drop water, build firebreak, return to base/refill, hover, fly to nearest fire |
 | Observations | 65 values: 5×5 fire and fuel windows, drone position, water, battery, wind, dryness, directions to the nearest fire and base, village threat, shares of the map burning and burnt |
@@ -99,7 +100,7 @@ Return on 50 unseen test episodes (seeds 1000–1049). The test return is the me
 
 - **PPO** is the best and most repeatable method: all three seeds learned, with a small spread. Combining its best settings, tested with one seed, collapsed into a policy that rarely fights the fire.
 - **DQN** also learned in every seed, but later and with large swings between checkpoints. Learning rate had the clearest effect, with the lowest value performing best.
-- **A2C** depends on the seed: two learned and one collapsed. Removing the entropy bonus was the only change that clearly worked.
+- **A2C** depends on the seed: two learned, and one collapsed. Removing the entropy bonus was the only change that clearly worked.
 - **REINFORCE** did not learn a useful policy. Its selected model simply returns to base, and its underlying policy stayed close to uniform. Likely causes are noisy Monte Carlo gradients and few updates.
 - **Generalization:** PPO stays the best learned agent when fire spreads faster, starts in more places, or meets stronger wind. Faster spread and more ignitions lowered every score; stronger wind did not.
 - **Reading "contained":** some fires burn out on their own. Always returning to base contains 22% of validation fires without using any water.
@@ -122,6 +123,7 @@ There are 31 automated tests. No trained models are needed to run them.
 ```bash
 uv run --extra dev pytest
 ```
+![tests result](https://github.com/hd77alu/hamed_rl_summative/blob/7daf45c7e8425c30af6313ff87da396d6fc27619/assets/agent_env/test-sc.png)
 
 ## Integration: Using the Trained Policy Outside Training
 ```bash
