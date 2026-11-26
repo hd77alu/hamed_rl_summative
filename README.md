@@ -8,7 +8,8 @@ Four TorchRL agents (**DQN, REINFORCE, PPO and A2C**) are trained and compared o
 
 ![FireShield environment](assets/agent_env/env_screenshot.png)
 
-> - **[Watch the trained PPO agent (MP4)](assets/agent_env/video/fireshield_ppo_agent.mp4)** 
+> - **[Watch the Demo video](https://screenpal.com/watch/cOXODJn4LsJ)** 
+> - **[Watch the trained PPO agent Simulation](https://youtu.be/5-06o4qzEuM)** 
 > - **[Full experiment tables and analysis](experiments.md)**
 
 ## Project Structure
@@ -74,12 +75,30 @@ This opens the simulation window and plays six test episodes with the trained PP
 
 | Part | Summary |
 |---|---|
-| World | 12×12 grid with forest, grass, rock, water, a village, and a base. Wind and dryness affect fire spread |
+| World | 12×12 grid with forest, grass, rock, water, a village and a base. Wind and dryness affect fire spread |
 | Agent | One drone with 4 water drops and 80 battery units, both restored at the base |
-| Actions (9, discrete) | Move in 4 directions, drop water, build firebreak, return to base/refill, hover, fly to nearest fire |
+| Actions | 9 discrete actions, listed below |
 | Observations | 65 values: 5×5 fire and fuel windows, drone position, water, battery, wind, dryness, directions to the nearest fire and base, village threat, shares of the map burning and burnt |
 | Rewards | +0.5 per cell extinguished, −1 per new ignition, small costs for time and wasted actions, +50 plus up to +50 for land saved when the fire is out, −50 if the village ignites, −20 if the battery runs out, plus distance-based shaping |
 | Episode ends | All fires out, village ignites, battery empty, or 250 steps |
+
+### Actions
+
+The agent has 9 discrete actions, as follows:
+
+| Action | Description |
+|---|---|
+| Move North | Move one step north. |
+| Move South | Move one step south. |
+| Move East | Move one step east. |
+| Move West | Move one step west. |
+| Drop Water | Use one unit of water to extinguish fire on the current cell and its four adjacent cells, and wet them to resist re-ignition. |
+| Build Firebreak | Remove the fuel from the current cell, if it is unburnt vegetation, so fire cannot spread through it. |
+| Return to Base | Move one step toward the base, or refill water and battery if already there. |
+| Hover and Scan | Stay in place for one step. No extra information is gained. |
+| Fly to Nearest Fire | Automatically move one step toward the nearest burning cell on the map. |
+
+Every action takes one step and uses one unit of battery, except refilling at the base, which uses no battery. Moving off the map leaves the drone in place with a −0.1 penalty.
 
 ## Final Results
 
